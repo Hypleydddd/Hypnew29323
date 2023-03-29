@@ -1,6 +1,8 @@
 import Head from 'next/head'
 import Footer from '../components/Footer'
 import { getPostByUri } from '../lib/test-data';
+import { client } from '../lib/apollo'
+import { gql } from '@apollo/client'
 
 export default function SlugPage({ post }) {
 
@@ -13,7 +15,7 @@ export default function SlugPage({ post }) {
 
       <main>
           <div className="siteHeader">
-            <h1 className="title">
+            <h1 >
                 {post.title}
             </h1>
             <p>✍️  &nbsp;&nbsp;{`${post.author.node.firstName} ${post.author.node.lastName}`} | 🗓️ &nbsp;&nbsp;{ new Date(post.date).toLocaleDateString() }</p>
@@ -30,8 +32,24 @@ export default function SlugPage({ post }) {
 
 
 export async function getStaticProps({ params }){
-  const response = await getPostByUri(params.uri)
-  const post = response?.data?.post
+  const GET_LISTING_BY_URI = gql`
+  query GetListingByURI($id: ID!) {
+    listing(id: $id, idType: URI) {
+      title
+      uri
+      date 
+
+    }
+  }
+  `
+
+  const response = await client.query({
+    query: GET_LISTING_BY_URI,
+    variables: {
+      id: params.uri
+    }
+  })
+  const post = response?.data?.listing
   return {
     props: {
       post
@@ -39,6 +57,7 @@ export async function getStaticProps({ params }){
   }
 }
 
+//allows next js to pre render different paths and optimise app for those routes. pass in an empty array. 
 export async function getStaticPaths(){
     const paths = []
     return {
