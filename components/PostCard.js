@@ -1,6 +1,5 @@
 import Link from "next/link"
 import 'keen-slider/keen-slider.min.css'
-import KeenSlider from 'keen-slider'
 
 export default function PostCard ({ post }){
     return (
